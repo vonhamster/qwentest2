@@ -1,0 +1,1074 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fallout Shelter Prototype</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a2e;
+            color: #eee;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            color: #ffd700;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .resources {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .resource {
+            background: linear-gradient(135deg, #16213e, #1a1a2e);
+            padding: 15px 25px;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+            min-width: 150px;
+            text-align: center;
+        }
+
+        .resource-name {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 5px;
+        }
+
+        .resource-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .main-area {
+            display: grid;
+            grid-template-columns: 1fr 350px;
+            gap: 20px;
+        }
+
+        @media (max-width: 900px) {
+            .main-area {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .vault-area {
+            background: linear-gradient(135deg, #16213e, #0f0f23);
+            border-radius: 15px;
+            padding: 20px;
+            border: 3px solid #333;
+        }
+
+        .rooms-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .room {
+            background: linear-gradient(135deg, #2d2d44, #1a1a2e);
+            border: 2px solid #444;
+            border-radius: 10px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .room:hover {
+            border-color: #ffd700;
+            transform: translateY(-2px);
+        }
+
+        .room-type {
+            font-size: 12px;
+            color: #888;
+            margin-bottom: 5px;
+        }
+
+        .room-name {
+            font-size: 16px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .room-level {
+            font-size: 12px;
+            color: #0f0;
+            margin-bottom: 10px;
+        }
+
+        .room-workers {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .room-production {
+            font-size: 11px;
+            color: #0ff;
+            margin-top: 5px;
+        }
+
+        .sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel {
+            background: linear-gradient(135deg, #16213e, #1a1a2e);
+            border-radius: 15px;
+            padding: 20px;
+            border: 2px solid #333;
+        }
+
+        .panel-title {
+            font-size: 18px;
+            color: #ffd700;
+            margin-bottom: 15px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #000;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            margin-bottom: 10px;
+            transition: all 0.3s;
+            font-family: 'Courier New', monospace;
+        }
+
+        .btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+        }
+
+        .btn:disabled {
+            background: #555;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .character-list {
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .character {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #ffd700;
+        }
+
+        .character-name {
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .character-stats {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 3px;
+        }
+
+        .stat-bar {
+            width: 60px;
+            height: 8px;
+            background: #333;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .stat-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ff8c00);
+            transition: width 0.3s;
+        }
+
+        .missions-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .mission {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #0ff;
+        }
+
+        .mission-name {
+            font-weight: bold;
+            color: #0ff;
+            margin-bottom: 5px;
+        }
+
+        .mission-info {
+            font-size: 12px;
+            color: #aaa;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #16213e, #1a1a2e);
+            padding: 30px;
+            border-radius: 15px;
+            border: 3px solid #ffd700;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            color: #aaa;
+        }
+
+        .form-select {
+            width: 100%;
+            padding: 10px;
+            background: #0f0f23;
+            border: 1px solid #444;
+            border-radius: 5px;
+            color: #eee;
+            font-family: 'Courier New', monospace;
+        }
+
+        .close-btn {
+            background: #ff4444;
+            margin-top: 10px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #16213e, #1a1a2e);
+            border: 2px solid #0f0;
+            padding: 15px 25px;
+            border-radius: 10px;
+            z-index: 2000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #666;
+            padding: 40px;
+        }
+
+        .progress-container {
+            margin-top: 10px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 6px;
+            background: #333;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0f0, #0ff);
+            transition: width 0.3s;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🏠 FALLOUT SHELTER PROTOTYPE</h1>
+        
+        <div class="resources">
+            <div class="resource">
+                <div class="resource-name">💧 Вода</div>
+                <div class="resource-value" id="water">0</div>
+            </div>
+            <div class="resource">
+                <div class="resource-name">📦 Патроны</div>
+                <div class="resource-value" id="ammo">0</div>
+            </div>
+            <div class="resource">
+                <div class="resource-name">🔨 Стройматериалы</div>
+                <div class="resource-value" id="materials">0</div>
+            </div>
+            <div class="resource">
+                <div class="resource-name">👥 Жителей</div>
+                <div class="resource-value" id="dwellers">0</div>
+            </div>
+        </div>
+
+        <div class="main-area">
+            <div class="vault-area">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="color: #ffd700;">🏭 Комнаты убежища</h2>
+                    <button class="btn" style="width: auto;" onclick="showBuildModal()">+ Построить комнату</button>
+                </div>
+                <div class="rooms-grid" id="roomsGrid">
+                    <div class="empty-state">Нет комнат. Постройте первую!</div>
+                </div>
+            </div>
+
+            <div class="sidebar">
+                <div class="panel">
+                    <div class="panel-title">👥 Персонажи</div>
+                    <div class="character-list" id="characterList"></div>
+                    <button class="btn" onclick="recruitDweller()" style="margin-top: 10px;">+ Нанять жителя (50 мат.)</button>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">🎯 Задания</div>
+                    <div class="missions-list" id="missionsList"></div>
+                    <button class="btn" onclick="showMissionModal()" style="margin-top: 10px;">+ Отправить в задание</button>
+                </div>
+
+                <div class="panel">
+                    <div class="panel-title">⚙️ Управление</div>
+                    <button class="btn" onclick="toggleAutoCollect()">Авто-сбор: <span id="autoCollectStatus">ВЫКЛ</span></button>
+                    <button class="btn" onclick="collectAllResources()">Собрать все ресурсы</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Build Modal -->
+    <div class="modal" id="buildModal">
+        <div class="modal-content">
+            <div class="modal-title">🏗️ Построить комнату</div>
+            <div class="form-group">
+                <label class="form-label">Тип комнаты:</label>
+                <select class="form-select" id="roomType">
+                    <option value="water">Водоочистная станция (50 мат.) - производит воду</option>
+                    <option value="ammo">Мастерская патронов (70 мат.) - производит патроны</option>
+                    <option value="materials">Перерабатывающий цех (60 мат.) - производит материалы</option>
+                    <option value="living">Жилой блок (40 мат.) - увеличивает лимит жителей</option>
+                    <option value="training">Тренировочный зал (80 мат.) - улучшает характеристики</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Название:</label>
+                <input type="text" class="form-select" id="roomName" placeholder="Введите название комнаты">
+            </div>
+            <button class="btn" onclick="buildRoom()">Построить</button>
+            <button class="btn close-btn" onclick="closeModal('buildModal')">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Mission Modal -->
+    <div class="modal" id="missionModal">
+        <div class="modal-content">
+            <div class="modal-title">🎯 Отправить в задание</div>
+            <div class="form-group">
+                <label class="form-label">Выберите персонажа:</label>
+                <select class="form-select" id="missionCharacter"></select>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Тип задания:</label>
+                <select class="form-select" id="missionType">
+                    <option value="scavenge">Поиск припасов (30 сек)</option>
+                    <option value="combat">Бой с рейдерами (60 сек)</option>
+                    <option value="explore">Исследование пустоши (90 сек)</option>
+                    <option value="trade">Торговая миссия (45 сек)</option>
+                </select>
+            </div>
+            <button class="btn" onclick="startMission()">Отправить</button>
+            <button class="btn close-btn" onclick="closeModal('missionModal')">Отмена</button>
+        </div>
+    </div>
+
+    <!-- Room Details Modal -->
+    <div class="modal" id="roomModal">
+        <div class="modal-content">
+            <div class="modal-title" id="roomModalTitle">🏭 Комната</div>
+            <div id="roomModalContent"></div>
+            <div style="margin-top: 20px; display: flex; gap: 10px;">
+                <button class="btn" id="upgradeRoomBtn" onclick="upgradeRoom()">Улучшить (<span id="upgradeCost">0</span> мат.)</button>
+                <button class="btn" style="background: #00aa00;" onclick="assignWorker()">Назначить работника</button>
+                <button class="btn close-btn" onclick="closeModal('roomModal')">Закрыть</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Game State
+        const gameState = {
+            resources: {
+                water: 100,
+                ammo: 50,
+                materials: 200
+            },
+            rooms: [],
+            dwellers: [],
+            missions: [],
+            autoCollect: false,
+            selectedRoom: null,
+            dwellerCount: 0,
+            maxDwellers: 10
+        };
+
+        // Room Types Configuration
+        const roomTypes = {
+            water: {
+                name: 'Водоочистная станция',
+                icon: '💧',
+                baseCost: 50,
+                production: { water: 5 },
+                upgradeMultiplier: 1.5,
+                description: 'Производит чистую воду'
+            },
+            ammo: {
+                name: 'Мастерская патронов',
+                icon: '📦',
+                baseCost: 70,
+                production: { ammo: 3 },
+                upgradeMultiplier: 1.5,
+                description: 'Производит боеприпасы'
+            },
+            materials: {
+                name: 'Перерабатывающий цех',
+                icon: '🔨',
+                baseCost: 60,
+                production: { materials: 4 },
+                upgradeMultiplier: 1.5,
+                description: 'Производит стройматериалы'
+            },
+            living: {
+                name: 'Жилой блок',
+                icon: '🏠',
+                baseCost: 40,
+                production: {},
+                upgradeMultiplier: 1.3,
+                description: 'Увеличивает лимит жителей на +5',
+                special: 'increase_capacity'
+            },
+            training: {
+                name: 'Тренировочный зал',
+                icon: '💪',
+                baseCost: 80,
+                production: {},
+                upgradeMultiplier: 1.4,
+                description: 'Улучшает характеристики работников'
+            }
+        };
+
+        // Initialize Game
+        function initGame() {
+            // Create starting dwellers
+            createDweller('Макс', { strength: 6, perception: 5, endurance: 7, charisma: 4, intelligence: 5, agility: 6, luck: 5 });
+            createDweller('Сара', { strength: 5, perception: 7, endurance: 6, charisma: 6, intelligence: 7, agility: 5, luck: 4 });
+            createDweller('Джек', { strength: 7, perception: 4, endurance: 5, charisma: 5, intelligence: 4, agility: 7, luck: 6 });
+            
+            updateUI();
+            startGameLoop();
+        }
+
+        // Create Dweller
+        function createDweller(name, stats) {
+            const dweller = {
+                id: Date.now() + Math.random(),
+                name: name,
+                stats: stats,
+                assignedRoom: null,
+                onMission: false,
+                level: 1,
+                xp: 0
+            };
+            gameState.dwellers.push(dweller);
+            return dweller;
+        }
+
+        // Generate Random Stats
+        function generateRandomStats() {
+            return {
+                strength: Math.floor(Math.random() * 6) + 3,
+                perception: Math.floor(Math.random() * 6) + 3,
+                endurance: Math.floor(Math.random() * 6) + 3,
+                charisma: Math.floor(Math.random() * 6) + 3,
+                intelligence: Math.floor(Math.random() * 6) + 3,
+                agility: Math.floor(Math.random() * 6) + 3,
+                luck: Math.floor(Math.random() * 6) + 3
+            };
+        }
+
+        // Build Room
+        function buildRoom() {
+            const roomType = document.getElementById('roomType').value;
+            const roomName = document.getElementById('roomName').value || roomTypes[roomType].name;
+            const config = roomTypes[roomType];
+
+            if (gameState.resources.materials < config.baseCost) {
+                showNotification('❌ Недостаточно стройматериалов!', 'error');
+                return;
+            }
+
+            gameState.resources.materials -= config.baseCost;
+
+            const room = {
+                id: Date.now(),
+                type: roomType,
+                name: roomName,
+                level: 1,
+                workers: [],
+                production: { ...config.production },
+                progress: 0,
+                maxProgress: 100,
+                cost: config.baseCost
+            };
+
+            if (roomType === 'living') {
+                gameState.maxDwellers += 5;
+            }
+
+            gameState.rooms.push(room);
+            closeModal('buildModal');
+            updateUI();
+            showNotification(`✅ Построено: ${room.name}`);
+        }
+
+        // Upgrade Room
+        function upgradeRoom() {
+            if (!gameState.selectedRoom) return;
+
+            const room = gameState.selectedRoom;
+            const config = roomTypes[room.type];
+            const upgradeCost = Math.floor(config.baseCost * Math.pow(config.upgradeMultiplier, room.level));
+
+            if (gameState.resources.materials < upgradeCost) {
+                showNotification('❌ Недостаточно стройматериалов!', 'error');
+                return;
+            }
+
+            gameState.resources.materials -= upgradeCost;
+            room.level++;
+
+            // Increase production
+            for (let resource in room.production) {
+                room.production[resource] = Math.floor(room.production[resource] * 1.5);
+            }
+
+            if (room.type === 'living') {
+                gameState.maxDwellers += 3;
+            }
+
+            updateUI();
+            updateRoomModal();
+            showNotification(`✅ Комната улучшена до уровня ${room.level}!`);
+        }
+
+        // Assign Worker to Room
+        function assignWorker() {
+            if (!gameState.selectedRoom) return;
+
+            const availableDwellers = gameState.dwellers.filter(d => !d.assignedRoom && !d.onMission);
+            
+            if (availableDwellers.length === 0) {
+                showNotification('❌ Нет свободных жителей!', 'error');
+                return;
+            }
+
+            // Auto-assign first available dweller
+            const dweller = availableDwellers[0];
+            dweller.assignedRoom = gameState.selectedRoom.id;
+            gameState.selectedRoom.workers.push(dweller.id);
+
+            updateUI();
+            updateRoomModal();
+            showNotification(`✅ ${dweller.name} назначен в ${gameState.selectedRoom.name}`);
+        }
+
+        // Recruit New Dweller
+        function recruitDweller() {
+            const cost = 50;
+            if (gameState.resources.materials < cost) {
+                showNotification('❌ Недостаточно стройматериалов!', 'error');
+                return;
+            }
+
+            if (gameState.dwellers.length >= gameState.maxDwellers) {
+                showNotification('❌ Достигнут лимит жителей! Постройте жилой блок.', 'error');
+                return;
+            }
+
+            gameState.resources.materials -= cost;
+            const names = ['Алекс', 'Мария', 'Джон', 'Эмма', 'Виктор', 'Нина', 'Олег', 'Зоя'];
+            const randomName = names[Math.floor(Math.random() * names.length)];
+            
+            createDweller(randomName, generateRandomStats());
+            updateUI();
+            showNotification(`✅ Нанят новый житель: ${randomName}`);
+        }
+
+        // Start Mission
+        function startMission() {
+            const characterId = document.getElementById('missionCharacter').value;
+            const missionType = document.getElementById('missionType').value;
+
+            if (!characterId) {
+                showNotification('❌ Выберите персонажа!', 'error');
+                return;
+            }
+
+            const dweller = gameState.dwellers.find(d => d.id == characterId);
+            if (!dweller) return;
+
+            const missionConfig = {
+                scavenge: { name: 'Поиск припасов', duration: 30, rewards: { materials: [20, 40], water: [10, 20] } },
+                combat: { name: 'Бой с рейдерами', duration: 60, rewards: { ammo: [30, 50], materials: [15, 30] } },
+                explore: { name: 'Исследование пустоши', duration: 90, rewards: { materials: [40, 80], water: [20, 40], ammo: [20, 40] } },
+                trade: { name: 'Торговая миссия', duration: 45, rewards: { materials: [25, 50], water: [15, 30] } }
+            };
+
+            const config = missionConfig[missionType];
+            
+            dweller.onMission = true;
+            if (dweller.assignedRoom) {
+                const room = gameState.rooms.find(r => r.id === dweller.assignedRoom);
+                if (room) {
+                    room.workers = room.workers.filter(id => id !== dweller.id);
+                }
+                dweller.assignedRoom = null;
+            }
+
+            const mission = {
+                id: Date.now(),
+                dwellerId: dweller.id,
+                type: missionType,
+                name: config.name,
+                duration: config.duration,
+                timeLeft: config.duration,
+                rewards: config.rewards
+            };
+
+            gameState.missions.push(mission);
+            closeModal('missionModal');
+            updateUI();
+            showNotification(`✅ ${dweller.name} отправлен: ${config.name}`);
+        }
+
+        // Complete Mission
+        function completeMission(mission) {
+            const dweller = gameState.dwellers.find(d => d.id === mission.dwellerId);
+            if (!dweller) return;
+
+            // Calculate rewards based on luck
+            const luckBonus = dweller.stats.luck / 10;
+            
+            for (let resource in mission.rewards) {
+                const range = mission.rewards[resource];
+                const baseReward = Math.floor((range[0] + range[1]) / 2);
+                const reward = Math.floor(baseReward * (1 + luckBonus));
+                gameState.resources[resource] = (gameState.resources[resource] || 0) + reward;
+            }
+
+            // Add XP
+            dweller.xp += 20;
+            if (dweller.xp >= 100) {
+                dweller.level++;
+                dweller.xp = 0;
+                // Improve random stat
+                const stats = Object.keys(dweller.stats);
+                const randomStat = stats[Math.floor(Math.random() * stats.length)];
+                dweller.stats[randomStat]++;
+                showNotification(`🎉 ${dweller.name} повысил уровень до ${dweller.level}!`);
+            }
+
+            dweller.onMission = false;
+            gameState.missions = gameState.missions.filter(m => m.id !== mission.id);
+            
+            showNotification(`✅ Миссия завершена! Получены ресурсы.`);
+            updateUI();
+        }
+
+        // Collect Resources from Room
+        function collectFromRoom(roomId) {
+            const room = gameState.rooms.find(r => r.id === roomId);
+            if (!room || room.progress < 100) return;
+
+            for (let resource in room.production) {
+                let amount = room.production[resource];
+                
+                // Add worker bonus
+                room.workers.forEach(workerId => {
+                    const worker = gameState.dwellers.find(d => d.id === workerId);
+                    if (worker) {
+                        // Apply relevant stat bonus
+                        if (resource === 'water') amount += Math.floor(worker.stats.perception * 0.5);
+                        if (resource === 'ammo') amount += Math.floor(worker.stats.intelligence * 0.5);
+                        if (resource === 'materials') amount += Math.floor(worker.stats.strength * 0.5);
+                    }
+                });
+
+                gameState.resources[resource] = (gameState.resources[resource] || 0) + amount;
+            }
+
+            room.progress = 0;
+            updateUI();
+            showNotification('✅ Ресурсы собраны!');
+        }
+
+        // Collect All Resources
+        function collectAllResources() {
+            let collected = false;
+            gameState.rooms.forEach(room => {
+                if (room.progress >= 100) {
+                    collectFromRoom(room.id);
+                    collected = true;
+                }
+            });
+            
+            if (!collected) {
+                showNotification('⏳ Нет готовых ресурсов для сбора');
+            }
+        }
+
+        // Toggle Auto Collect
+        function toggleAutoCollect() {
+            gameState.autoCollect = !gameState.autoCollect;
+            document.getElementById('autoCollectStatus').textContent = gameState.autoCollect ? 'ВКЛ' : 'ВЫКЛ';
+            showNotification(gameState.autoCollect ? '✅ Авто-сбор включен' : '⏸️ Авто-сбор выключен');
+        }
+
+        // Show Build Modal
+        function showBuildModal() {
+            document.getElementById('buildModal').style.display = 'flex';
+        }
+
+        // Show Mission Modal
+        function showMissionModal() {
+            const select = document.getElementById('missionCharacter');
+            select.innerHTML = '';
+            
+            const availableDwellers = gameState.dwellers.filter(d => !d.onMission);
+            
+            if (availableDwellers.length === 0) {
+                showNotification('❌ Все жители заняты!', 'error');
+                return;
+            }
+
+            availableDwellers.forEach(dweller => {
+                const option = document.createElement('option');
+                option.value = dweller.id;
+                option.textContent = `${dweller.name} (Ур.${dweller.level})`;
+                select.appendChild(option);
+            });
+
+            document.getElementById('missionModal').style.display = 'flex';
+        }
+
+        // Show Room Details Modal
+        function showRoomModal(roomId) {
+            const room = gameState.rooms.find(r => r.id === roomId);
+            if (!room) return;
+
+            gameState.selectedRoom = room;
+            updateRoomModal();
+            document.getElementById('roomModal').style.display = 'flex';
+        }
+
+        // Update Room Modal
+        function updateRoomModal() {
+            const room = gameState.selectedRoom;
+            if (!room) return;
+
+            const config = roomTypes[room.type];
+            const upgradeCost = Math.floor(config.baseCost * Math.pow(config.upgradeMultiplier, room.level));
+
+            document.getElementById('roomModalTitle').textContent = `${config.icon} ${room.name}`;
+            document.getElementById('upgradeCost').textContent = upgradeCost;
+
+            let content = `
+                <div style="margin-bottom: 15px;">
+                    <strong>Уровень:</strong> ${room.level}<br>
+                    <strong>Тип:</strong> ${config.description}
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <strong>Производство:</strong><br>
+            `;
+
+            for (let resource in room.production) {
+                content += `&nbsp;&nbsp;${resource === 'water' ? '💧' : resource === 'ammo' ? '📦' : '🔨'} ${room.production[resource]}/цикл<br>`;
+            }
+
+            if (Object.keys(room.production).length === 0) {
+                content += '&nbsp;&nbsp;Нет производства';
+            }
+
+            content += `</div>`;
+
+            // Progress bar
+            content += `
+                <div class="progress-container">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Прогресс:</span>
+                        <span>${Math.floor(room.progress)}%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${room.progress}%"></div>
+                    </div>
+                </div>
+            `;
+
+            // Workers
+            content += `<div style="margin-top: 15px;"><strong>Работники (${room.workers.length}):</strong><br>`;
+            if (room.workers.length === 0) {
+                content += '&nbsp;&nbsp;Нет работников';
+            } else {
+                room.workers.forEach(workerId => {
+                    const worker = gameState.dwellers.find(d => d.id === workerId);
+                    if (worker) {
+                        content += `&nbsp;&nbsp;👤 ${worker.name}<br>`;
+                    }
+                });
+            }
+            content += '</div>';
+
+            document.getElementById('roomModalContent').innerHTML = content;
+        }
+
+        // Close Modal
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+
+        // Show Notification
+        function showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.style.borderColor = type === 'error' ? '#ff4444' : '#0f0';
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Update UI
+        function updateUI() {
+            // Resources
+            document.getElementById('water').textContent = Math.floor(gameState.resources.water);
+            document.getElementById('ammo').textContent = Math.floor(gameState.resources.ammo);
+            document.getElementById('materials').textContent = Math.floor(gameState.resources.materials);
+            document.getElementById('dwellers').textContent = `${gameState.dwellers.length}/${gameState.maxDwellers}`;
+
+            // Rooms
+            const roomsGrid = document.getElementById('roomsGrid');
+            if (gameState.rooms.length === 0) {
+                roomsGrid.innerHTML = '<div class="empty-state">Нет комнат. Постройте первую!</div>';
+            } else {
+                roomsGrid.innerHTML = gameState.rooms.map(room => {
+                    const config = roomTypes[room.type];
+                    let productionText = '';
+                    for (let resource in room.production) {
+                        productionText += `${resource === 'water' ? '💧' : resource === 'ammo' ? '📦' : '🔨'} +${room.production[resource]} `;
+                    }
+
+                    return `
+                        <div class="room" onclick="showRoomModal(${room.id})">
+                            <div class="room-type">${config.icon} ${config.name}</div>
+                            <div class="room-name">${room.name}</div>
+                            <div class="room-level">Уровень: ${room.level}</div>
+                            <div class="room-workers">👥 Работников: ${room.workers.length}</div>
+                            ${productionText ? `<div class="room-production">${productionText}/цикл</div>` : ''}
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${room.progress}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Characters
+            const characterList = document.getElementById('characterList');
+            if (gameState.dwellers.length === 0) {
+                characterList.innerHTML = '<div class="empty-state">Нет жителей</div>';
+            } else {
+                characterList.innerHTML = gameState.dwellers.map(dweller => {
+                    const status = dweller.onMission ? '🎯 В задании' : (dweller.assignedRoom ? '🏭 Работает' : '😴 Свободен');
+                    
+                    return `
+                        <div class="character">
+                            <div class="character-name">${dweller.name} (Ур.${dweller.level})</div>
+                            <div style="font-size: 12px; color: #0ff; margin-bottom: 8px;">${status}</div>
+                            <div class="character-stats">
+                                <div class="stat-row">
+                                    <span>💪 STR</span>
+                                    <div class="stat-bar"><div class="stat-fill" style="width: ${(dweller.stats.strength / 10) * 100}%"></div></div>
+                                </div>
+                                <div class="stat-row">
+                                    <span>👁️ PER</span>
+                                    <div class="stat-bar"><div class="stat-fill" style="width: ${(dweller.stats.perception / 10) * 100}%"></div></div>
+                                </div>
+                                <div class="stat-row">
+                                    <span>❤️ END</span>
+                                    <div class="stat-bar"><div class="stat-fill" style="width: ${(dweller.stats.endurance / 10) * 100}%"></div></div>
+                                </div>
+                                <div class="stat-row">
+                                    <span>🎯 LCK</span>
+                                    <div class="stat-bar"><div class="stat-fill" style="width: ${(dweller.stats.luck / 10) * 100}%"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Missions
+            const missionsList = document.getElementById('missionsList');
+            if (gameState.missions.length === 0) {
+                missionsList.innerHTML = '<div class="empty-state">Нет активных заданий</div>';
+            } else {
+                missionsList.innerHTML = gameState.missions.map(mission => {
+                    const dweller = gameState.dwellers.find(d => d.id === mission.dwellerId);
+                    const progress = ((mission.duration - mission.timeLeft) / mission.duration) * 100;
+                    
+                    return `
+                        <div class="mission">
+                            <div class="mission-name">${mission.name}</div>
+                            <div class="mission-info">
+                                👤 ${dweller ? dweller.name : 'Неизвестно'}<br>
+                                ⏱️ ${Math.ceil(mission.timeLeft)}с осталось
+                            </div>
+                            <div class="progress-container">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progress}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
+
+        // Game Loop
+        function startGameLoop() {
+            setInterval(() => {
+                // Update room production
+                gameState.rooms.forEach(room => {
+                    let productionSpeed = 1;
+                    
+                    // Worker bonus
+                    if (room.workers.length > 0) {
+                        productionSpeed += room.workers.length * 0.5;
+                        
+                        // Stat bonuses
+                        room.workers.forEach(workerId => {
+                            const worker = gameState.dwellers.find(d => d.id === workerId);
+                            if (worker) {
+                                if (room.type === 'water') productionSpeed += worker.stats.perception * 0.05;
+                                if (room.type === 'ammo') productionSpeed += worker.stats.intelligence * 0.05;
+                                if (room.type === 'materials') productionSpeed += worker.stats.strength * 0.05;
+                            }
+                        });
+                    }
+
+                    room.progress += productionSpeed;
+                    if (room.progress >= 100) {
+                        room.progress = 100;
+                        
+                        // Auto-collect if enabled
+                        if (gameState.autoCollect) {
+                            collectFromRoom(room.id);
+                        }
+                    }
+                });
+
+                // Update missions
+                gameState.missions.forEach(mission => {
+                    mission.timeLeft--;
+                    if (mission.timeLeft <= 0) {
+                        completeMission(mission);
+                    }
+                });
+
+                updateUI();
+            }, 1000);
+        }
+
+        // Close modals on outside click
+        window.onclick = function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.style.display = 'none';
+            }
+        }
+
+        // Initialize game on load
+        initGame();
+    </script>
+</body>
+</html>
